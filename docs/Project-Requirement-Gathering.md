@@ -13,6 +13,7 @@ The application shall allow users to:
   - Arrival Time
   - Burst Time
   - Priority (where applicable)
+  - Time Quantum (In Round Robin)
 
 ### Scheduling
 The application shall:
