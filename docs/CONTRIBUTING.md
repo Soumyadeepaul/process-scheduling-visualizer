@@ -191,118 +191,135 @@ Every simulation update originates from the backend.
 
 ---
 
-
 # API Design
 
 The backend follows a **REST + WebSocket** architecture.
 
-- **REST APIs** are responsible for creating, updating, deleting and controlling the simulation.
-- **WebSockets** are responsible for broadcasting real-time simulation updates to the frontend.
-
-Every REST request (except session creation) must include the user's **Session ID**.
+- **REST APIs** handle user actions and simulation management.
+- **WebSocket** provides real-time simulation updates.
+- Every user receives a unique **Session ID**, stored in the browser's Session Storage.
+- All requests (except session creation) include the Session ID so the backend can identify the user's simulation state.
 
 ---
 
 ## Session APIs
 
-| Method | Endpoint | Description |
-|---------|----------|-------------|
-| GET | `/session` | Create a new user session and return a Session ID |
-
-The frontend stores the returned Session ID in **Session Storage** and includes it in all future requests.
+| Method | Endpoint | Purpose |
+|---------|----------|---------|
+| POST | `/api/v1/session` | Create a new simulation session. |
+| DELETE | `/api/v1/session/{sessionId}` | End the current session. |
 
 ---
 
 ## Process APIs
 
-| Method | Endpoint | Description |
-|---------|----------|-------------|
-| POST | `/process` | Add a new process |
-| PUT | `/process/{pid}` | Update a process |
-| DELETE | `/process/{pid}` | Delete a process |
-| GET | `/processes` | Get all processes |
+| Method | Endpoint | Purpose |
+|---------|----------|---------|
+| GET | `/api/v1/processes` | Retrieve all processes. |
+| POST | `/api/v1/processes` | Add a process. |
+| PUT | `/api/v1/processes/{processId}` | Update a process. |
+| DELETE | `/api/v1/processes/{processId}` | Delete a process. |
 
 ---
 
 ## Scheduler APIs
 
-| Method | Endpoint | Description |
-|---------|----------|-------------|
-| POST | `/scheduler/algorithm` | Change scheduling algorithm |
-| GET | `/scheduler/algorithms` | Get supported algorithms |
+| Method | Endpoint | Purpose |
+|---------|----------|---------|
+| GET | `/api/v1/scheduler` | Retrieve scheduler configuration. |
+| PUT | `/api/v1/scheduler` | Update scheduling algorithm and parameters. |
 
 ---
 
 ## Simulation APIs
 
-| Method | Endpoint | Description |
-|---------|----------|-------------|
-| POST | `/simulation/play` | Start simulation |
-| POST | `/simulation/pause` | Pause simulation |
-| POST | `/simulation/resume` | Resume simulation |
-| POST | `/simulation/reset` | Reset simulation |
-| POST | `/simulation/step` | Execute one simulation step |
-| POST | `/simulation/back` | Move to previous simulation state |
-| POST | `/simulation/speed` | Change simulation speed |
+| Method | Endpoint | Purpose |
+|---------|----------|---------|
+| POST | `/api/v1/simulation/play` | Start simulation. |
+| POST | `/api/v1/simulation/pause` | Pause simulation. |
+| POST | `/api/v1/simulation/resume` | Resume simulation. |
+| POST | `/api/v1/simulation/reset` | Reset simulation. |
+| POST | `/api/v1/simulation/step` | Execute one simulation tick. |
+| POST | `/api/v1/simulation/previous` | Move to the previous simulation state. |
+| POST | `/api/v1/simulation/forward` | Fast-forward simulation. |
+| PUT | `/api/v1/simulation/speed` | Update simulation speed. |
 
 ---
 
 ## Metrics APIs
 
-| Method | Endpoint | Description |
-|---------|----------|-------------|
-| GET | `/metrics` | Generate metrics for the current simulation state |
+| Method | Endpoint | Purpose |
+|---------|----------|---------|
+| GET | `/api/v1/metrics` | Retrieve current simulation metrics. |
 
 ---
 
 ## WebSocket
 
 ```
-ws://<host>/ws/{session_id}
+ws://<host>/api/v1/ws/{sessionId}
 ```
 
-The frontend establishes a WebSocket connection after obtaining a Session ID.
+The frontend establishes a WebSocket connection using the Session ID and receives live updates for:
 
-The backend pushes real-time simulation updates, including:
-
-- Current Time
+- Process State
 - Ready Queue
 - Running Process
-- Waiting Queue
-- Terminated Queue
-- Gantt Chart Updates
-- Process State Changes
-- Live Metrics
+- Completed Queue
+- CPU State
+- Gantt Chart
+- Performance Metrics
 
-The frontend should **never compute scheduling logic**. It should only render the simulation state received from the backend.
+---
+
+## API Design Principles
+
+- Every simulation is associated with a unique Session ID.
+- Session data is maintained in server memory for the duration of the session.
+- REST APIs are used for user actions and configuration changes.
+- WebSocket is used exclusively for real-time state synchronization.
+- The backend is the single source of truth for the simulation state.
+- The frontend only visualizes the state received from the backend.
 
 ---
 
 ## Request Flow
 
 ```
-Frontend
-     │
-REST Request
-(Session ID + Payload)
-     │
-     ▼
-FastAPI
-     │
-     ▼
-Simulation Controller
-     │
-     ▼
-Scheduler Engine
-     │
-     ▼
-Simulation State Updated
-     │
-     ▼
-WebSocket Broadcast
-     │
-     ▼
-React UI Updated
+User
+   │
+   ▼
+React Frontend
+   │
+REST Request + Session ID
+   │
+   ▼
+Controller Layer
+   │
+Validate Session
+   │
+   ▼
+Session Service
+   │
+Load Simulation State
+   │
+   ▼
+Simulation Service
+   │
+   ▼
+Scheduler Service
+   │
+   ▼
+Scheduling Algorithm
+   │
+Update Simulation State
+   │
+   ├────────► Metrics Service
+   │
+   └────────► WebSocket Service
+                    │
+                    ▼
+            React Frontend
 ```
 
 ---
