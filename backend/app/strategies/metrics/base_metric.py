@@ -1,0 +1,1 @@
+# Base metric strategy interface.

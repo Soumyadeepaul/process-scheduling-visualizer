@@ -1,0 +1,1 @@
+# Schedule segment model.
