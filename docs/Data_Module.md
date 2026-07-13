@@ -1,4 +1,4 @@
-# CPU Scheduler Simulator — Data Module Design Document
+# Data Module Design Document
 
 **Version:** 1.0
 **Scope:** Backend domain model, service layer, and data structures
