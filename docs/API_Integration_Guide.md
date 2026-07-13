@@ -40,80 +40,6 @@ This document describes the *contract* — request shapes, response shapes, fiel
 - Every failed response follows the envelope described in [Section 9](#9-error-handling).
 - IDs: `session_id` is a string (UUID). `process_id` is an integer, auto-assigned by the backend on creation — **never sent by the frontend**.
 
----
-
-## 2. Data Models
-
-These are the canonical object shapes referenced throughout this document. Define matching TypeScript interfaces on the frontend.
-
-### 2.1 Process
-
-```ts
-interface Process {
-  id: number;                // auto-generated, read-only
-  arrival_time: number;      // tick at which process enters the ready queue
-  burst_time: number;        // total CPU time required
-  priority: number | null;   // lower number = higher priority; null if algorithm doesn't use priority
-  remaining_time: number;    // read-only, updated live by simulation engine
-  status: ProcessStatus;     // read-only
-  start_time: number | null; // read-only, tick of first CPU allocation (null until scheduled)
-  completion_time: number | null; // read-only, tick of completion (null until finished)
-  color: string;             // read-only, hex color assigned by backend for consistent Gantt/UI rendering
-}
-
-type ProcessStatus = "waiting" | "ready" | "running" | "completed";
-```
-
-**Frontend-supplied fields on Create/Update:** `arrival_time`, `burst_time`, `priority` only. All other fields are backend-computed and should be treated as read-only display data.
-
-### 2.2 Scheduler Config
-
-```ts
-interface SchedulerConfig {
-  algorithm: SchedulerAlgorithm;
-  time_quantum: number | null; // required and > 0 only when algorithm === "ROUND_ROBIN", else null
-}
-
-type SchedulerAlgorithm =
-  | "FCFS"                 // First Come First Serve
-  | "SJF"                  // Shortest Job First (non-preemptive)
-  | "SJF_PREEMPTIVE"        // Shortest Remaining Time First
-  | "PRIORITY"              // Priority (non-preemptive)
-  | "PRIORITY_PREEMPTIVE"   // Priority (preemptive)
-  | "ROUND_ROBIN";
-```
-
-### 2.3 Metrics
-
-```ts
-interface Metrics {
-  waiting_time: { per_process: { [processId: number]: number }; average: number };
-  turnaround_time: { per_process: { [processId: number]: number }; average: number };
-  response_time: { per_process: { [processId: number]: number }; average: number };
-  completion_time: { per_process: { [processId: number]: number } };
-  cpu_utilization: number; // percentage, 0–100
-}
-```
-
-### 2.4 Gantt Chart Entry
-
-```ts
-interface GanttEntry {
-  process_id: number | null; // null represents CPU idle time
-  start: number;             // tick
-  end: number;                // tick
-}
-```
-
-### 2.5 CPU State
-
-```ts
-interface CpuState {
-  status: "idle" | "busy";
-  running_process_id: number | null;
-  current_tick: number;
-}
-```
 
 ---
 
@@ -157,12 +83,11 @@ Every browser tab/user needs an isolated session before touching any other endpo
 
 ### 4.1 List Processes
 
-`GET /api/v1/processes`
+`POST /api/v1/processes`
 
-**Response `200`:**
+**Request Body:**
 ```json
-{
-  "success": true,
+{ "session_id" : "sessionId"
   "data": [
     {
       "id": 1,
@@ -179,6 +104,11 @@ Every browser tab/user needs an isolated session before touching any other endpo
 }
 ```
 
+**Response `200`:**
+```json
+{ "success": true }
+```
+
 ### 4.2 Add Process
 
 `POST /api/v1/processes`
@@ -193,25 +123,12 @@ Every browser tab/user needs an isolated session before touching any other endpo
 
 **Example Request**
 ```json
-{ "arrival_time": 0, "burst_time": 5, "priority": 2 }
+{"session_id": 1, "id": 5, "arrival_time": 0, "burst_time": 5, "priority": 2 }
 ```
 
 **Response `201`:**
 ```json
-{
-  "success": true,
-  "data": {
-    "id": 1,
-    "arrival_time": 0,
-    "burst_time": 5,
-    "priority": 2,
-    "remaining_time": 5,
-    "status": "waiting",
-    "start_time": null,
-    "completion_time": null,
-    "color": "#4F46E5"
-  }
-}
+{ "success": true }
 ```
 
 **Form fields for the "Add Process" modal** (this is the equivalent of your "student add form" example):
@@ -262,14 +179,20 @@ Every browser tab/user needs an isolated session before touching any other endpo
 
 ### 5.1 Get Scheduler Config
 
-`GET /api/v1/scheduler`
+`POST /api/v1/scheduler`
+**request body:**
+```json
+{
+  "session_id": "1"
+  "data": { "algorithm": "ROUND_ROBIN", "time_quantum": 4 }
+}
+
+```
+
 
 **Response `200`:**
 ```json
-{
-  "success": true,
-  "data": { "algorithm": "ROUND_ROBIN", "time_quantum": 4 }
-}
+{ "success": true }
 ```
 
 ### 5.2 Update Scheduler Config
@@ -374,6 +297,8 @@ All endpoints below take **no request body** except `PUT /simulation/speed`, and
 ---
 
 ## 8. WebSocket — Live Updates
+
+**Check LLD Doc for details**
 
 **Connect:** `ws://<host>/api/v1/ws/{sessionId}` — open immediately after session creation, and keep open for the lifetime of the tab.
 
@@ -495,34 +420,7 @@ On tab close / "End Session":
   → close WebSocket
 ```
 
----
-
-## 11. Suggested React State Shape
-
-```ts
-interface AppState {
-  sessionId: string | null;
-  processes: Process[];
-  scheduler: SchedulerConfig;
-  readyQueue: number[];
-  runningProcessId: number | null;
-  completedQueue: number[];
-  cpuState: CpuState;
-  ganttChart: GanttEntry[];
-  metrics: Metrics | null;
-  simulation: {
-    isPlaying: boolean;
-    speed: 1 | 2 | 5;
-  };
-  ui: {
-    isAddProcessModalOpen: boolean;
-    error: { code: string; message: string } | null;
-  };
-}
-```
-
-Recommended split: `processes` + `scheduler` managed via REST (React Query / RTK Query with cache invalidation on mutation), everything else (`readyQueue`, `runningProcessId`, `completedQueue`, `cpuState`, `ganttChart`, `metrics`) managed via a WebSocket-driven reducer (`useReducer` or a Zustand/Redux slice), since those fields only ever change from server push, never from a direct user REST response.
 
 <p align="center">
-  <img src="images/CPU_Scheduler_Sequence_Diagram.png" alt="CPU_Scheduler_Sequence_Diagram" width="1000"/>
+  <img src="images/sequence_diagram.png" alt="CPU_Scheduler_Sequence_Diagram" width="1000"/>
 </p>
