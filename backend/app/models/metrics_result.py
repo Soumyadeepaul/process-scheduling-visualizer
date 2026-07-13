@@ -1,58 +1,107 @@
-"""
-MetricsResult domain model.
-
-Aggregated output of MetricService.compute_metrics(), combining the
-result of every registered MetricStrategy (waiting time, turnaround
-time, response time, completion time, CPU utilization). Mirrors the
-JSON shape returned by GET /api/v1/metrics and pushed via the
-PERFORMANCE_METRICS WebSocket message.
-"""
-
-from __future__ import annotations
-
-from dataclasses import dataclass, field
-from typing import Dict
-
-
-@dataclass
 class MetricBreakdown:
-    """Per-process values plus the average, for a single metric type.
 
-    Used for waiting_time, turnaround_time, and response_time - the
-    three metrics that report both an average and a per-process value.
-    """
+    def __init__(self):
+        self.__perProcess = {}
+        self.__average = 0.0
 
-    per_process: Dict[int, float] = field(default_factory=dict)
-    average: float = 0.0
+    # -----------------------
+    # Getters
+    # -----------------------
 
-    def recompute_average(self) -> None:
-        values = list(self.per_process.values())
-        self.average = round(sum(values) / len(values), 2) if values else 0.0
+    def getPerProcess(self):
+        return self.__perProcess
 
-    def to_dict(self) -> dict:
+    def getAverage(self):
+        return self.__average
+
+    # -----------------------
+    # Setters
+    # -----------------------
+
+    def setPerProcess(self, perProcess):
+        self.__perProcess = perProcess
+
+    def setAverage(self, average):
+        self.__average = average
+
+    # -----------------------
+    # Helper Methods
+    # -----------------------
+
+    def recomputeAverage(self):
+        values = list(self.__perProcess.values())
+
+        if len(values) == 0:
+            self.__average = 0.0
+        else:
+            self.__average = round(sum(values) / len(values), 2)
+
+    def toDict(self):
         return {
-            "per_process": {str(k): v for k, v in self.per_process.items()},
-            "average": round(self.average, 2),
+            "per_process": {str(key): value for key, value in self.__perProcess.items()},
+            "average": self.__average,
         }
 
 
-@dataclass
 class MetricsResult:
-    """Full metrics snapshot for a simulation session at a point in time."""
 
-    waiting_time: MetricBreakdown = field(default_factory=MetricBreakdown)
-    turnaround_time: MetricBreakdown = field(default_factory=MetricBreakdown)
-    response_time: MetricBreakdown = field(default_factory=MetricBreakdown)
-    completion_time: Dict[int, int] = field(default_factory=dict)
-    cpu_utilization: float = 0.0
+    def __init__(self):
+        self.__waitingTime = MetricBreakdown()
+        self.__turnaroundTime = MetricBreakdown()
+        self.__responseTime = MetricBreakdown()
+        self.__completionTime = {}
+        self.__cpuUtilization = 0.0
 
-    def to_dict(self) -> dict:
-        """Serialize to the exact JSON shape used by GET /metrics and the
-        PERFORMANCE_METRICS WebSocket message."""
+    # -----------------------
+    # Getters
+    # -----------------------
+
+    def getWaitingTime(self):
+        return self.__waitingTime
+
+    def getTurnaroundTime(self):
+        return self.__turnaroundTime
+
+    def getResponseTime(self):
+        return self.__responseTime
+
+    def getCompletionTime(self):
+        return self.__completionTime
+
+    def getCpuUtilization(self):
+        return self.__cpuUtilization
+
+    # -----------------------
+    # Setters
+    # -----------------------
+
+    def setWaitingTime(self, waitingTime):
+        self.__waitingTime = waitingTime
+
+    def setTurnaroundTime(self, turnaroundTime):
+        self.__turnaroundTime = turnaroundTime
+
+    def setResponseTime(self, responseTime):
+        self.__responseTime = responseTime
+
+    def setCompletionTime(self, completionTime):
+        self.__completionTime = completionTime
+
+    def setCpuUtilization(self, cpuUtilization):
+        self.__cpuUtilization = cpuUtilization
+
+    # -----------------------
+    # Helper Methods
+    # -----------------------
+
+    def toDict(self):
         return {
-            "waiting_time": self.waiting_time.to_dict(),
-            "turnaround_time": self.turnaround_time.to_dict(),
-            "response_time": self.response_time.to_dict(),
-            "completion_time": {str(k): v for k, v in self.completion_time.items()},
-            "cpu_utilization": round(self.cpu_utilization, 2),
+            "waiting_time": self.__waitingTime.toDict(),
+            "turnaround_time": self.__turnaroundTime.toDict(),
+            "response_time": self.__responseTime.toDict(),
+            "completion_time": {
+                str(key): value
+                for key, value in self.__completionTime.items()
+            },
+            "cpu_utilization": round(self.__cpuUtilization, 2),
         }

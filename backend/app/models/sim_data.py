@@ -1,19 +1,4 @@
-"""
-SimData domain model.
-
-Concrete per-session runtime record held inside
-SimulationState.data_map (keyed by session_id). Tracks the computed
-schedule, the current simulation clock, the last computed metrics,
-and the reconciled process list at the current tick. This is the
-object WebSocketService reads from to build every outgoing snapshot
-message (PROCESS_TABLE, READY_QUEUE, RUNNING_PROCESS, COMPLETED_QUEUE,
-CPU_STATE, GANTT_CHART, PERFORMANCE_METRICS).
-"""
-
-from __future__ import annotations
-
-from dataclasses import dataclass, field
-from typing import List, Optional
+from typing import List
 
 from app.models.metrics_result import MetricsResult
 from app.models.process import Process
@@ -21,62 +6,114 @@ from app.models.process_status import ProcessStatus
 from app.models.schedule_segment import ScheduleSegment
 
 
-@dataclass
 class SimData:
-    """Runtime simulation state for a single session."""
 
-    session_id: str
-    schedule: List[ScheduleSegment] = field(default_factory=list)
-    current_time: int = 0
-    metrics: Optional[MetricsResult] = None
-    process_list: List[Process] = field(default_factory=list)
+    def __init__(self, sessionId: str):
+        self.__sessionId = sessionId
+        self.__schedule = []
+        self.__currentTime = 0
+        self.__metrics = None
+        self.__processList = []
 
-    # ---- Schedule access ----------------------------------------------------
+    # -----------------------
+    # Getters
+    # -----------------------
 
-    def set_schedule(self, segments: List[ScheduleSegment]) -> None:
-        self.schedule = segments
+    def getSessionId(self):
+        return self.__sessionId
 
-    def append_schedule(self, segments: List[ScheduleSegment]) -> None:
-        self.schedule.extend(segments)
+    def getSchedule(self):
+        return self.__schedule
 
-    def segments_up_to(self, tick: int) -> List[ScheduleSegment]:
-        """Segments that have started by the given tick - what
-        ScheduleReviser walks to reconcile process state."""
-        return [s for s in self.schedule if s.start <= tick]
+    def getCurrentTime(self):
+        return self.__currentTime
 
-    def segment_at(self, tick: int) -> Optional[ScheduleSegment]:
-        return next((s for s in self.schedule if s.contains_tick(tick)), None)
+    def getMetrics(self):
+        return self.__metrics
 
-    # ---- Clock -----------------------------------------------------------------
+    def getProcessList(self):
+        return self.__processList
 
-    def advance(self, ticks: int = 1) -> None:
-        self.current_time += ticks
+    # -----------------------
+    # Setters
+    # -----------------------
 
-    def rewind(self, ticks: int = 1) -> None:
-        self.current_time = max(0, self.current_time - ticks)
+    def setSessionId(self, sessionId):
+        self.__sessionId = sessionId
 
-    def reset(self) -> None:
-        self.schedule = []
-        self.current_time = 0
-        self.metrics = None
-        for process in self.process_list:
-            process.reset_runtime_state()
+    def setSchedule(self, schedule: List[ScheduleSegment]):
+        self.__schedule = schedule
 
-    # ---- Derived live views (used to build WebSocket snapshots) -----------------
+    def setCurrentTime(self, currentTime):
+        self.__currentTime = currentTime
 
-    def ready_queue(self) -> List[int]:
-        return [p.id for p in self.process_list if p.status == ProcessStatus.READY]
+    def setMetrics(self, metrics: MetricsResult):
+        self.__metrics = metrics
 
-    def running_process_id(self) -> Optional[int]:
-        running = next((p for p in self.process_list if p.status == ProcessStatus.RUNNING), None)
-        return running.id if running else None
+    def setProcessList(self, processList: List[Process]):
+        self.__processList = processList
 
-    def completed_queue(self) -> List[int]:
-        completed = [p for p in self.process_list if p.status == ProcessStatus.COMPLETED]
-        completed.sort(key=lambda p: p.completion_time or 0)
-        return [p.id for p in completed]
+    # -----------------------
+    # Schedule Methods
+    # -----------------------
 
-    # ---- Metrics -----------------------------------------------------------------
+    def appendSchedule(self, segments: List[ScheduleSegment]):
+        self.__schedule.extend(segments)
 
-    def set_metrics(self, metrics: MetricsResult) -> None:
-        self.metrics = metrics
+    def getSegmentsUpTo(self, tick):
+        return [segment for segment in self.__schedule if segment.getStart() <= tick]
+
+    def getSegmentAt(self, tick):
+        for segment in self.__schedule:
+            if segment.containsTick(tick):
+                return segment
+        return None
+
+    # -----------------------
+    # Clock Methods
+    # -----------------------
+
+    def advance(self, ticks=1):
+        self.__currentTime += ticks
+
+    def rewind(self, ticks=1):
+        self.__currentTime = max(0, self.__currentTime - ticks)
+
+    def reset(self):
+        self.__schedule.clear()
+        self.__currentTime = 0
+        self.__metrics = None
+
+        for process in self.__processList:
+            process.reset()
+
+    # -----------------------
+    # Runtime Views
+    # -----------------------
+
+    def getReadyQueue(self):
+        ready = []
+
+        for process in self.__processList:
+            if process.getStatus() == ProcessStatus.READY:
+                ready.append(process.getId())
+
+        return ready
+
+    def getRunningProcessId(self):
+        for process in self.__processList:
+            if process.getStatus() == ProcessStatus.RUNNING:
+                return process.getId()
+
+        return None
+
+    def getCompletedQueue(self):
+        completed = []
+
+        for process in self.__processList:
+            if process.getStatus() == ProcessStatus.COMPLETED:
+                completed.append(process)
+
+        completed.sort(key=lambda p: p.getCompletionTime() or 0)
+
+        return [process.getId() for process in completed]

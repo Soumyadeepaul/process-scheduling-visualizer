@@ -1,144 +1,108 @@
-"""
-Process domain model.
-
-The fundamental unit of simulation. One instance exists per process
-created by the user (POST /api/v1/processes). Instances are created
-exclusively through ProcessFactory.create_processes() so that id
-assignment, defaults, and validation stay centralized in one place.
-
-Field reference (mirrors the JSON shape used by the API/WebSocket
-contracts):
-
-    id               int              auto-assigned, read-only
-    arrival_time     int              tick the process enters the ready queue
-    burst_time       int              total CPU time required
-    priority         int | None       used only by priority-based strategies
-    remaining_time   int              read-only, updated live by the scheduler
-    status           ProcessStatus    read-only
-    start_time       int | None       tick of first CPU allocation
-    completion_time  int | None       tick of completion
-    color            str              hex color for consistent UI rendering
-"""
-
-from __future__ import annotations
-
-from dataclasses import dataclass, field
 from typing import Optional
 
 from app.models.process_status import ProcessStatus
 
-DEFAULT_COLOR = "#4F46E5"
 
-
-@dataclass
 class Process:
-    """A single process participating in the CPU scheduling simulation."""
 
-    id: int
-    arrival_time: int
-    burst_time: int
-    priority: Optional[int] = None
-    remaining_time: int = field(default=0)
-    status: ProcessStatus = field(default=ProcessStatus.WAITING)
-    start_time: Optional[int] = None
-    completion_time: Optional[int] = None
-    color: str = DEFAULT_COLOR
+    def __init__(
+        self,
+        processId: int,
+        arrivalTime: int,
+        burstTime: int,
+        priority: Optional[int] = None
+    ):
+        self.__id = processId
+        self.__arrivalTime = arrivalTime
+        self.__burstTime = burstTime
+        self.__priority = priority
 
-    def __post_init__(self) -> None:
-        if self.arrival_time < 0:
-            raise ValueError("arrival_time must be >= 0")
-        if self.burst_time <= 0:
-            raise ValueError("burst_time must be > 0")
-        if self.priority is not None and self.priority < 0:
-            raise ValueError("priority must be >= 0")
-        if self.remaining_time == 0:
-            self.remaining_time = self.burst_time
+        self.__remainingTime = burstTime
+        self.__status = ProcessStatus.WAITING
+        self.__startTime = None
+        self.__completionTime = None
 
-    # ---- Getters --------------------------------------------------------
+    # -----------------------
+    # Getters
+    # -----------------------
 
-    def get_id(self) -> int:
-        return self.id
+    def getId(self):
+        return self.__id
 
-    def get_arrival_time(self) -> int:
-        return self.arrival_time
+    def getArrivalTime(self):
+        return self.__arrivalTime
 
-    def get_burst_time(self) -> int:
-        return self.burst_time
+    def getBurstTime(self):
+        return self.__burstTime
 
-    def get_priority(self) -> Optional[int]:
-        return self.priority
+    def getPriority(self):
+        return self.__priority
 
-    def get_remaining_time(self) -> int:
-        return self.remaining_time
+    def getRemainingTime(self):
+        return self.__remainingTime
 
-    def get_status(self) -> ProcessStatus:
-        return self.status
+    def getStatus(self):
+        return self.__status
 
-    def get_start_time(self) -> Optional[int]:
-        return self.start_time
+    def getStartTime(self):
+        return self.__startTime
 
-    def get_completion_time(self) -> Optional[int]:
-        return self.completion_time
+    def getCompletionTime(self):
+        return self.__completionTime
 
-    def get_color(self) -> str:
-        return self.color
+    def getColor(self):
+        return self.__color
 
-    # ---- Setters --------------------------------------------------------
+    # -----------------------
+    # Setters
+    # -----------------------
 
-    def set_arrival_time(self, arrival_time: int) -> None:
-        self.arrival_time = arrival_time
+    def setArrivalTime(self, arrivalTime):
+        self.__arrivalTime = arrivalTime
 
-    def set_burst_time(self, burst_time: int) -> None:
-        self.burst_time = burst_time
+    def setBurstTime(self, burstTime):
+        self.__burstTime = burstTime
 
-    def set_priority(self, priority: Optional[int]) -> None:
-        self.priority = priority
+    def setPriority(self, priority):
+        self.__priority = priority
 
-    def set_remaining_time(self, remaining_time: int) -> None:
-        self.remaining_time = max(0, remaining_time)
-        if self.remaining_time == 0:
-            self.status = ProcessStatus.COMPLETED
+    def setRemainingTime(self, remainingTime):
+        self.__remainingTime = remainingTime
 
-    def set_status(self, status: ProcessStatus) -> None:
-        self.status = status
+    def setStatus(self, status):
+        self.__status = status
 
-    def set_start_time(self, start_time: int) -> None:
-        # First allocation only; response time depends on this staying fixed.
-        if self.start_time is None:
-            self.start_time = start_time
+    def setStartTime(self, startTime):
+        self.__startTime = startTime
 
-    def set_completion_time(self, completion_time: int) -> None:
-        self.completion_time = completion_time
+    def setCompletionTime(self, completionTime):
+        self.__completionTime = completionTime
 
-    def set_color(self, color: str) -> None:
-        self.color = color
 
-    # ---- Convenience ------------------------------------------------------
+    # -----------------------
+    # Helper Methods
+    # -----------------------
 
-    def is_completed(self) -> bool:
-        return self.status == ProcessStatus.COMPLETED
+    def hasArrived(self, currentTime):
+        return currentTime >= self.__arrivalTime
 
-    def has_arrived(self, current_time: int) -> bool:
-        return current_time >= self.arrival_time
+    def isCompleted(self):
+        return self.__status == ProcessStatus.COMPLETED
 
-    def reset_runtime_state(self) -> None:
-        """Used by ScheduleReviser / SchedulerService.reset() to return the
-        process to its pre-simulation state while preserving user input."""
-        self.remaining_time = self.burst_time
-        self.status = ProcessStatus.WAITING
-        self.start_time = None
-        self.completion_time = None
+    def reset(self):
+        self.__remainingTime = self.__burstTime
+        self.__status = ProcessStatus.WAITING
+        self.__startTime = None
+        self.__completionTime = None
 
-    def to_dict(self) -> dict:
-        """Serialize to the exact JSON shape expected by the frontend."""
+    def toDict(self):
         return {
-            "id": self.id,
-            "arrival_time": self.arrival_time,
-            "burst_time": self.burst_time,
-            "priority": self.priority,
-            "remaining_time": self.remaining_time,
-            "status": self.status.value,
-            "start_time": self.start_time,
-            "completion_time": self.completion_time,
-            "color": self.color,
+            "id": self.__id,
+            "arrival_time": self.__arrivalTime,
+            "burst_time": self.__burstTime,
+            "priority": self.__priority,
+            "remaining_time": self.__remainingTime,
+            "status": self.__status.value,
+            "start_time": self.__startTime,
+            "completion_time": self.__completionTime,
         }

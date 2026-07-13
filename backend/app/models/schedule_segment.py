@@ -1,47 +1,55 @@
-"""
-ScheduleSegment domain model.
-
-The atomic output unit of any SchedulingStrategy.execute() call -
-equivalent to a single bar in the Gantt chart. A `process` of None
-represents CPU idle time between two busy segments.
-"""
-
-from __future__ import annotations
-
-from dataclasses import dataclass
-from typing import Optional
-
 from app.models.process import Process
 
 
-@dataclass
 class ScheduleSegment:
-    """One contiguous block of CPU time assigned to a process (or idle)."""
 
-    process: Optional[Process]
-    start: int
-    end: int
+    def __init__(self, process: Process, start: int, end: int):
+        self.__process = process
+        self.__start = start
+        self.__end = end
 
-    def __post_init__(self) -> None:
-        if self.end < self.start:
-            raise ValueError("ScheduleSegment.end must be >= start")
+    # -----------------------
+    # Getters
+    # -----------------------
 
-    @property
-    def duration(self) -> int:
-        return self.end - self.start
+    def getProcess(self):
+        return self.__process
 
-    @property
-    def is_idle(self) -> bool:
-        return self.process is None
+    def getStart(self):
+        return self.__start
 
-    def contains_tick(self, tick: int) -> bool:
-        return self.start <= tick < self.end
+    def getEnd(self):
+        return self.__end
 
-    def to_dict(self) -> dict:
-        """Serialize to the exact JSON shape used in the GANTT_CHART
-        WebSocket payload."""
+    # -----------------------
+    # Setters
+    # -----------------------
+
+    def setProcess(self, process):
+        self.__process = process
+
+    def setStart(self, start):
+        self.__start = start
+
+    def setEnd(self, end):
+        self.__end = end
+
+    # -----------------------
+    # Helper Methods
+    # -----------------------
+
+    def getDuration(self):
+        return self.__end - self.__start
+
+    def isIdle(self):
+        return self.__process is None
+
+    def containsTick(self, tick):
+        return self.__start <= tick < self.__end
+
+    def toDict(self):
         return {
-            "process_id": self.process.id if self.process else None,
-            "start": self.start,
-            "end": self.end,
+            "process_id": self.__process.getId() if self.__process else None,
+            "start": self.__start,
+            "end": self.__end,
         }
