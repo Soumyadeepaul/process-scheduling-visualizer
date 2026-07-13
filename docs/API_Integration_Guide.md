@@ -11,7 +11,6 @@ This document describes the *contract* — request shapes, response shapes, fiel
 ## Table of Contents
 
 1. [Conventions](#1-conventions)
-2. [Data Models](#2-data-models)
 3. [Session APIs](#3-session-apis)
 4. [Process APIs](#4-process-apis)
 5. [Scheduler APIs](#5-scheduler-apis)
@@ -20,7 +19,6 @@ This document describes the *contract* — request shapes, response shapes, fiel
 8. [WebSocket — Live Updates](#8-websocket--live-updates)
 9. [Error Handling](#9-error-handling)
 10. [End-to-End Frontend Workflow](#10-end-to-end-frontend-workflow)
-11. [Suggested React State Shape](#11-suggested-react-state-shape)
 
 ---
 
@@ -381,17 +379,17 @@ All non-2xx responses follow this shape:
 ```
 On app load:
   1. POST /session                     → store session_id
-  2. GET /processes                    → hydrate process table
-  3. GET /scheduler                    → hydrate algorithm/quantum controls
+  2. POST /processes                   → create processes
+  3. POST /scheduler                    → set algorithm/quantum controls
   4. Open WebSocket ws://.../ws/{session_id}
 
 User adds a process:
-  → POST /processes  { arrival_time, burst_time, priority }
-  → WebSocket pushes updated PROCESS_TABLE
+  → POST /processes  { sessionid, id, arrival_time, burst_time, priority }
+  → WebSocket pushes updated running process from PROCESS_TABLE 
 
 User edits a process:
   → PUT /processes/{id}  { arrival_time, burst_time, priority }
-  → WebSocket pushes updated PROCESS_TABLE
+  → WebSocket pushes updated running process from PROCESS_TABLE
 
 User deletes a process:
   → DELETE /processes/{id}
