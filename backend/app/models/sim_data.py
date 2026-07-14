@@ -13,6 +13,9 @@ class SimData:
         self.__currentTime = 0
         self.__metrics = None
         self.__processList = []
+        self.__currentSegmentIndex = 0
+        self.__paused = False
+        self.__running = False
 
     # -----------------------
     # Getters
@@ -30,6 +33,15 @@ class SimData:
     def getProcessList(self):
         return self.__processList
 
+    def getCurrentSegmentIndex(self):
+        return self.__currentSegmentIndex
+    
+    def isPaused(self):
+        return self.__paused
+    
+    def isRunning(self):
+        return self.__running
+
     # -----------------------
     # Setters
     # -----------------------
@@ -46,7 +58,15 @@ class SimData:
 
     def setProcessList(self, processList: List[Process]):
         self.__processList = processList
+    
+    def setCurrentSegmentIndex(self, index):
+        self.__currentSegmentIndex = index
+        
+    def setPaused(self, paused):
+        self.__paused = paused
 
+    def setRunning(self, running):
+        self.__running = running
     # -----------------------
     # Schedule Methods
     # -----------------------

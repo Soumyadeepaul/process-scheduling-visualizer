@@ -1,5 +1,5 @@
 # Registers all API routers.
-from fastapi import APIRouter, Request, HTTPException
+from fastapi import APIRouter, Request, HTTPException, WebSocket, WebSocketDisconnect
 from app.services.session.session_service import Session
 from app.models.session_data import SessionData
 from app.factory.process_factory import ProcessFactory
@@ -8,6 +8,7 @@ from app.schemas.process_schema import CreateProcessesRequest, AddProcessRequest
 from app.schemas.scheduler_schema import SchedulerRequest
 from app.schemas.session_schema import SessionRequest
 from app.services.simulation.simulation_service import Simulation
+from app.websocket.websocket_instance import websocketService
 
 router = APIRouter(
     prefix="/api/v1",
@@ -52,16 +53,16 @@ def delete_session(session_id: str):
 @router.post("/processes")
 def create_processes(request: CreateProcessesRequest):
 
-    sessionId = request.session_id
+    session_id = request.session_id
 
-    if sessionId not in __sessionMap:
+    if session_id not in __sessionMap:
         raise HTTPException(status_code=404, detail="Session not found")
 
     processList = __processFactory.createProcess(request.data)
 
-    __sessionMap[sessionId].setProcessList(processList)
+    __sessionMap[session_id].setProcessList(processList)
     
-    for process in __sessionMap[sessionId].getProcessList():
+    for process in __sessionMap[session_id].getProcessList():
         print(process.getId())
 
     return {"success": True}
@@ -70,9 +71,9 @@ def create_processes(request: CreateProcessesRequest):
 @router.post("/addprocess", status_code=201)
 def add_process(request: AddProcessRequest):
 
-    sessionId = request.session_id
+    session_id = request.session_id
 
-    if sessionId not in __sessionMap:
+    if session_id not in __sessionMap:
         raise HTTPException(status_code=404, detail="Session not found")
 
     process = Process(
@@ -82,9 +83,9 @@ def add_process(request: AddProcessRequest):
         request.priority
     )
 
-    __sessionMap[sessionId].addProcess(process)
+    __sessionMap[session_id].addProcess(process)
     
-    for process in __sessionMap[sessionId].getProcessList():
+    for process in __sessionMap[session_id].getProcessList():
         print(process.getId())
 
     return {
@@ -109,12 +110,12 @@ def add_process(request: AddProcessRequest):
 @router.put("/scheduler")
 def update_scheduler(request: SchedulerRequest):
 
-    sessionId = request.session_id
+    session_id = request.session_id
 
-    if sessionId not in __sessionMap:
+    if session_id not in __sessionMap:
         raise HTTPException(status_code=404, detail="Session not found")
 
-    session = __sessionMap[sessionId]
+    session = __sessionMap[session_id]
 
     session.setAlgorithm(request.data.algorithm)
 
@@ -126,82 +127,9 @@ def update_scheduler(request: SchedulerRequest):
     return {
         "success": True
     }
-
-# # -----------------------
-# # Simulation APIs
-# # -----------------------
-
-@router.post("/simulation/play")
-def play_simulation(request : SessionRequest):
-    
-    session_id = request.session_id
-
-    if session_id not in __sessionMap:
-        raise HTTPException(status_code=404, detail="Session not found")
-
-    session = __sessionMap[session_id]
-
-    # Update current action
-    session.setAction("PLAY")
-    
-    __simulationService.handleAction(session_id,session)
     
     
 
-
-@router.post("/simulation/pause")
-def pause_simulation(request : SessionRequest):
-    session_id = request.session_id
-
-    if session_id not in __sessionMap:
-        raise HTTPException(status_code=404, detail="Session not found")
-
-    session = __sessionMap[session_id]
-
-    # Update current action
-    session.setAction("PAUSE")
-    
-    __simulationService(session_id,session)
-
-
-@router.post("/simulation/resume")
-def resume_simulation(request : SessionRequest):
-    session_id = request.session_id
-
-    if session_id not in __sessionMap:
-        raise HTTPException(status_code=404, detail="Session not found")
-
-    session = __sessionMap[session_id]
-
-    # Update current action
-    session.setAction("RESUME")
-    
-    __simulationService(session_id,session)
-
-
-# @router.post("/simulation/reset")
-# def reset_simulation():
-#     pass
-
-
-# @router.post("/simulation/step")
-# def step_simulation():
-#     pass
-
-
-# @router.post("/simulation/previous")
-# def previous_step():
-#     pass
-
-
-# @router.post("/simulation/forward")
-# def forward_step():
-#     pass
-
-
-# @router.put("/simulation/speed")
-# def change_speed():
-#     pass
 
 
 # # -----------------------
@@ -211,3 +139,43 @@ def resume_simulation(request : SessionRequest):
 # @router.get("/metrics")
 # def get_metrics():
 #     pass
+
+
+# # -----------------------
+# # Websocket API
+# # -----------------------
+
+
+
+@router.websocket("/ws/{session_id}")
+async def websocket_endpoint(websocket: WebSocket, session_id: str):
+
+    await websocketService.connect(session_id, websocket)
+
+    try:
+
+        while True:
+
+            message = await websocket.receive_json()
+
+            action = message["action"]
+            session = __sessionMap[session_id]
+            session.setAction(action)
+            print(action)
+            if action == "PLAY":
+                await __simulationService.handleAction(session_id,session)
+
+            elif action == "PAUSE":
+                await __simulationService.handleAction(session_id,session)
+
+            elif action == "RESUME":
+                await __simulationService.handleAction(session_id,session)
+
+            # elif action == "STEP":
+            #     __simulationService.step(session_id,session)
+
+            # elif action == "RESET":
+            #     __simulationService.reset(session_id,session)
+
+    except WebSocketDisconnect:
+        websocketService.disconnect(session_id)

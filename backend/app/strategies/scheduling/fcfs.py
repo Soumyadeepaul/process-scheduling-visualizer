@@ -9,6 +9,10 @@ class FCFS(SchedulingStrategy):
         # fcfs algo
         
         #return list of ScheduleSegemnt
-        s= ScheduleSegment(100,2,3)
-        s1= ScheduleSegment(122,12,12)
-        return [s,s1]
+        s= ScheduleSegment(processList[0],0,3)
+        s1= ScheduleSegment(processList[1],3,9)
+        s2= ScheduleSegment(processList[0],15,19)
+        s3= ScheduleSegment(processList[1],19,20)
+        
+        
+        return [s,s1,s2,s3]

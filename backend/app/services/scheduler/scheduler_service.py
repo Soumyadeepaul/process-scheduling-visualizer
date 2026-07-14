@@ -14,5 +14,5 @@ class SchedulerService:
         print(time_qunatum)
         strategy = self.__schedulingFactory.getStrategy(algorithm)
         self.__similationState.setSchedule(session_id, strategy.execute(processList,time_qunatum))  #will get  list of Schedule Segment
-        self.__similationState.getSchedule(session_id)
+        # self.__similationState.getSchedule(session_id)
         
