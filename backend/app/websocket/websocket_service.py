@@ -51,3 +51,16 @@ class WebSocketService:
             )
         except (WebSocketDisconnect, RuntimeError):
             self.disconnect(session_id)
+    
+    async def sendReset(self, session_id):
+
+        websocket = self.__manager.getConnection(session_id)
+
+        if websocket is None:
+            return
+
+        await websocket.send_json(
+            {
+                "type": "RESET_COMPLETE"
+            }
+        )

@@ -161,21 +161,10 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
             action = message["action"]
             session = __sessionMap[session_id]
             session.setAction(action)
+            if action == "SPEED":
+                session.setSpeed(message["speed"])
             print(action)
-            if action == "PLAY":
-                await __simulationService.handleAction(session_id,session)
-
-            elif action == "PAUSE":
-                await __simulationService.handleAction(session_id,session)
-
-            elif action == "RESUME":
-                await __simulationService.handleAction(session_id,session)
-
-            # elif action == "STEP":
-            #     __simulationService.step(session_id,session)
-
-            # elif action == "RESET":
-            #     __simulationService.reset(session_id,session)
+            await __simulationService.handleAction(session_id,session)
 
     except WebSocketDisconnect:
         websocketService.disconnect(session_id)

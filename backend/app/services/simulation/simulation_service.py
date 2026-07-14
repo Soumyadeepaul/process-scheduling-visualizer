@@ -1,6 +1,5 @@
 from app.services.scheduler.scheduler_service import SchedulerService
 from app.websocket.websocket_instance import websocketService
-from app.state.simulation_state import SimilationState
 from app.state.simulation_state_instance import simulationState
 
 import asyncio
@@ -12,6 +11,7 @@ class Simulation:
 
     __tasks = {}
     __paused = {}
+    __speed = {}
 
     async def handleAction(self, session_id, session_data):
 
@@ -28,6 +28,8 @@ class Simulation:
 
             self.__paused[session_id] = False
 
+            self.__speed[session_id] = session_data.getSpeed()
+
             self.__tasks[session_id] = asyncio.create_task(
                 self.__runSimulation(session_id)
             )
@@ -39,38 +41,74 @@ class Simulation:
         elif action == "RESUME":
 
             self.__paused[session_id] = False
+        elif action == "RESET":
 
+            task = self.__tasks.get(session_id)
+
+            if task and not task.done():
+                task.cancel()
+            self.__tasks.pop(session_id, None)
+            self.__paused.pop(session_id, None)
+            simData = simulationState.getSchedule(session_id)
+
+            if simData:
+                simData.reset()
+            await websocketService.sendReset(session_id)
+            
+        elif action == "SPEED":
+            
+            self.__speed[session_id] = session_data.getSpeed()
     async def __runSimulation(self, session_id):
 
-        simData = simulationState.getSchedule(session_id)
+        try:
 
-        if simData is None:
-            return
+            simData = simulationState.getSchedule(session_id)
 
-        previous_end = 0
+            if simData is None:
+                return
 
-        for segment in simData.getSchedule():
+            previous_end = 0
 
-            # Initial idle time
-            idle = segment.getStart() - previous_end
+            for segment in simData.getSchedule():
 
-            if idle > 0:
-                await asyncio.sleep(idle)
+                # Current simulation speed
+                speed = self.__speed.get(session_id, 1)
 
-            await websocketService.sendSegment(
-                session_id,
-                segment
-            )
+                # Initial idle time
+                idle = segment.getStart() - previous_end
 
-            # Process executes completely
-            await asyncio.sleep(segment.getDuration())
+                if idle > 0:
+                    await asyncio.sleep(idle / speed)
 
-            simData.setCurrentTime(segment.getEnd())
+                await websocketService.sendSegment(
+                    session_id,
+                    segment
+                )
 
-            previous_end = segment.getEnd()
+                # Process executes completely
+                await asyncio.sleep(segment.getDuration() / speed)
 
-            # Pause only AFTER process completion
-            while self.__paused.get(session_id, False):
-                await asyncio.sleep(0.1)
+                # Update simulation clock
+                simData.setCurrentTime(segment.getEnd())
 
-        await websocketService.simulationComplete(session_id)
+                previous_end = segment.getEnd()
+
+                # Pause after current process finishes
+                while self.__paused.get(session_id, False):
+                    await asyncio.sleep(0.1)
+
+            # Simulation completed normally
+            await websocketService.simulationComplete(session_id)
+
+        except asyncio.CancelledError:
+
+            print(f"Simulation {session_id} reset.")
+
+            # Don't send SIMULATION_COMPLETE on reset
+            raise
+
+        finally:
+
+            # Cleanup runtime state
+            self.__tasks.pop(session_id, None)
+            self.__paused.pop(session_id, None)
