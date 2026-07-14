@@ -8,8 +8,7 @@ from app.models.schedule_segment import ScheduleSegment
 
 class SimData:
 
-    def __init__(self, sessionId: str):
-        self.__sessionId = sessionId
+    def __init__(self):
         self.__schedule = []
         self.__currentTime = 0
         self.__metrics = None
@@ -18,9 +17,6 @@ class SimData:
     # -----------------------
     # Getters
     # -----------------------
-
-    def getSessionId(self):
-        return self.__sessionId
 
     def getSchedule(self):
         return self.__schedule
@@ -38,8 +34,6 @@ class SimData:
     # Setters
     # -----------------------
 
-    def setSessionId(self, sessionId):
-        self.__sessionId = sessionId
 
     def setSchedule(self, schedule: List[ScheduleSegment]):
         self.__schedule = schedule

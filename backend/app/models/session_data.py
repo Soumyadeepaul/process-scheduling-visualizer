@@ -3,8 +3,7 @@ from app.models.process import Process
 
 class SessionData:
 
-    def __init__(self, sessionId: str):
-        self.__sessionId = sessionId
+    def __init__(self):
         self.__processList = []
 
         self.__algorithm = "FCFS"
@@ -16,9 +15,6 @@ class SessionData:
     # -----------------------
     # Getters
     # -----------------------
-
-    def getSessionId(self):
-        return self.__sessionId
 
     def getProcessList(self):
         return self.__processList
@@ -38,9 +34,6 @@ class SessionData:
     # -----------------------
     # Setters
     # -----------------------
-
-    def setSessionId(self, sessionId):
-        self.__sessionId = sessionId
 
     def setProcessList(self, processList):
         self.__processList = processList

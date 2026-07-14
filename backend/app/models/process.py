@@ -50,13 +50,10 @@ class Process:
     def getCompletionTime(self):
         return self.__completionTime
 
-    def getColor(self):
-        return self.__color
-
     # -----------------------
     # Setters
     # -----------------------
-
+    
     def setArrivalTime(self, arrivalTime):
         self.__arrivalTime = arrivalTime
 
