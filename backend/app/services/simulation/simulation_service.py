@@ -31,7 +31,7 @@ class Simulation:
             self.__speed[session_id] = session_data.getSpeed()
 
             self.__tasks[session_id] = asyncio.create_task(
-                self.__runSimulation(session_id)
+                self.__runSimulation(session_id, session_data)
             )
 
         elif action == "PAUSE":
@@ -49,16 +49,14 @@ class Simulation:
                 task.cancel()
             self.__tasks.pop(session_id, None)
             self.__paused.pop(session_id, None)
-            simData = simulationState.getSchedule(session_id)
-
-            if simData:
-                simData.reset()
+            simulationState.removeSchedule(session_id)
             await websocketService.sendReset(session_id)
             
         elif action == "SPEED":
             
             self.__speed[session_id] = session_data.getSpeed()
-    async def __runSimulation(self, session_id):
+            
+    async def __runSimulation(self, session_id, session_data):
 
         try:
 
@@ -67,14 +65,21 @@ class Simulation:
             if simData is None:
                 return
 
-            previous_end = 0
+            while simData.getCurrentSegmentIndex() < len(simData.getSchedule()):
 
-            for segment in simData.getSchedule():
+                segment = simData.getSchedule()[simData.getCurrentSegmentIndex()]
 
                 # Current simulation speed
                 speed = self.__speed.get(session_id, 1)
 
                 # Initial idle time
+                if simData.getCurrentSegmentIndex() == 0:
+                    previous_end = 0
+                else:
+                    previous_end = simData.getSchedule()[
+                        simData.getCurrentSegmentIndex() - 1
+                    ].getEnd()
+
                 idle = segment.getStart() - previous_end
 
                 if idle > 0:
@@ -90,6 +95,21 @@ class Simulation:
 
                 # Update simulation clock
                 simData.setCurrentTime(segment.getEnd())
+                simData.setCurrentSegmentIndex(simData.getCurrentSegmentIndex() + 1)
+                
+                if session_data.isDirty():
+
+                    self.__schedulerService.recompute(
+                        session_id,
+                        session_data.getProcessList(),
+                        session_data.getAlgorithm(),
+                        session_data.getTimeQuantum()
+                    )
+
+                    session_data.setDirty(False)
+
+                    # Refresh runtime state after recomputation
+                    simData = simulationState.getSchedule(session_id)
 
                 previous_end = segment.getEnd()
 

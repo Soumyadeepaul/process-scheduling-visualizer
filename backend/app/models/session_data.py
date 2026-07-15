@@ -11,6 +11,8 @@ class SessionData:
 
         self.__action = None
         self.__speed = 1
+        
+        self.__dirty = False
 
     # -----------------------
     # Getters
@@ -30,6 +32,10 @@ class SessionData:
 
     def getSpeed(self):
         return self.__speed
+    
+    def isDirty(self):
+        return self.__dirty
+
 
     # -----------------------
     # Setters
@@ -49,6 +55,9 @@ class SessionData:
 
     def setSpeed(self, speed):
         self.__speed = speed
+
+    def setDirty(self, dirty):
+        self.__dirty = dirty
 
     # -----------------------
     # Process Methods
