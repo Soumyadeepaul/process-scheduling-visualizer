@@ -18,6 +18,7 @@ class Simulation:
         action = session_data.getAction()
 
         if action == "PLAY":
+            
 
             self.__schedulerService.computeInitial(
                 session_id,
@@ -55,6 +56,8 @@ class Simulation:
         elif action == "SPEED":
             
             self.__speed[session_id] = session_data.getSpeed()
+        
+            
             
     async def __runSimulation(self, session_id, session_data):
 

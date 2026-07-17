@@ -1,3 +1,3 @@
-from app.state.simulation_state import SimilationState
+from app.state.simulation_state import SimulationState
 
-simulationState = SimilationState()
+simulationState = SimulationState()

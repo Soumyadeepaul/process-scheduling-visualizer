@@ -9,6 +9,7 @@ from app.schemas.scheduler_schema import SchedulerRequest
 from app.schemas.session_schema import SessionRequest
 from app.services.simulation.simulation_service import Simulation
 from app.websocket.websocket_instance import websocketService
+from app.state.simulation_state_instance import simulationState
 
 router = APIRouter(
     prefix="/api/v1",
@@ -136,10 +137,28 @@ def update_scheduler(request: SchedulerRequest):
 # # Metrics API
 # # -----------------------
 
-# @router.get("/metrics")
-# def get_metrics():
-#     pass
 
+@router.get("/metrics")
+def get_metrics(session_id: str):
+
+    if session_id not in __sessionMap:
+        raise HTTPException(
+            status_code=404,
+            detail="Session not found."
+        )
+
+    metrics = simulationState.getMetrics(session_id)
+
+    if metrics is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Metrics not available."
+        )
+
+    return {
+        "success": True,
+        "data": metrics.toDict()
+    }
 
 # # -----------------------
 # # Websocket API
@@ -163,7 +182,6 @@ async def websocket_endpoint(websocket: WebSocket, session_id: str):
             session.setAction(action)
             if action == "SPEED":
                 session.setSpeed(message["speed"])
-            print(action)
             await __simulationService.handleAction(session_id,session)
 
     except WebSocketDisconnect:
