@@ -1,3 +1,5 @@
+                                                                                                                                             # FCFS scheduling algorithm.
+
 from app.strategies.scheduling.base_strategy import SchedulingStrategy
 from app.models.schedule_segment import ScheduleSegment
 from app.models.process_status import ProcessStatus
