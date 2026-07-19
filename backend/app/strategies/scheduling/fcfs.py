@@ -10,22 +10,30 @@ class FCFS(SchedulingStrategy):
     def execute(self, processList, timeQuantum, startTime=0):
 
         schedule = []
-
         currentTime = startTime
 
-        # FCFS: Arrival Time -> Process ID
+        # Only schedule processes that are not yet completed
         processes = sorted(
-            processList,
+            [p for p in processList if p.getRemainingTime() > 0],
             key=lambda p: (p.getArrivalTime(), p.getId())
         )
 
         for process in processes:
 
-            # CPU idle until process arrives
+            # If the process arrives after the current time,
+            # CPU remains idle until its arrival.
             if currentTime < process.getArrivalTime():
                 currentTime = process.getArrivalTime()
 
+            # Skip processes that have already finished
+            if process.getRemainingTime() == 0:
+                continue
+
             process.setStatus(ProcessStatus.RUNNING)
+
+            # Preserve the original start time
+            if process.getStartTime() is None:
+                process.setStartTime(currentTime)
 
             start = currentTime
             end = start + process.getRemainingTime()
@@ -44,8 +52,5 @@ class FCFS(SchedulingStrategy):
             process.setRemainingTime(0)
             process.setCompletionTime(end)
             process.setStatus(ProcessStatus.COMPLETED)
-
-            if process.getStartTime() is None:
-                process.setStartTime(start)
 
         return schedule

@@ -1,35 +1,44 @@
 # Executes scheduling workflow.
 from app.factory.scheduling_factory import SchedulingFactory
-from app.state.simulation_state import SimilationState
+from app.state.simulation_state_instance import simulationState
 from app.services.scheduler.schedule_reviser import ScheduleReviser
-from copy import deepcopy
 class SchedulerService:
     
     __schedulingFactory = SchedulingFactory()
-    __similationState = SimilationState()
     __scheduleReviser = ScheduleReviser()
     
     def computeInitial(self, session_id, processList, algorithm, time_qunatum):
 
-        # Schedule already exists for this session
-        if self.__similationState.getSchedule(session_id):
-            return
+        
 
         strategy = self.__schedulingFactory.getStrategy(algorithm)
         
-        workingProcessList = deepcopy(processList)
+        schedule = strategy.execute(processList,time_qunatum,0)
 
-        schedule = strategy.execute(workingProcessList, time_qunatum, 0)
-
-        self.__similationState.setSchedule(session_id, schedule)
+        simulationState.setSchedule(session_id,schedule,processList)
     
     
     
     def recompute(self, session_id, processList, algorithm, time_qunatum):
 
-        simData = self.__similationState.getSchedule(session_id)
+        simData = simulationState.getSchedule(session_id)
+        
+        print("===== Session Process List =====")
+        for p in processList:
+            print(
+                p.getId(),
+                p.getRemainingTime()
+            )
+
+        print("===== Simulation Process List =====")
+        for p in simData.getProcessList():
+            print(
+                p.getId(),
+                p.getRemainingTime()
+            )
 
         if simData is None:
+            print("dsvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
             self.computeInitial(
                 session_id,
                 processList,
@@ -44,12 +53,9 @@ class SchedulerService:
         )
 
         strategy = self.__schedulingFactory.getStrategy(algorithm)
-
+        print("Current Time:", simData.getCurrentTime())
+        print("Current Index:", simData.getCurrentSegmentIndex())
         # Compute remaining schedule
         newSchedule = strategy.execute(revisedProcessList, time_qunatum, simData.getCurrentTime())
 
-        # TODO:
-        # Shift schedule to start from currentTime
-
-        # Append to existing executed schedule
-        simData.getSchedule().extend(newSchedule)
+        simulationState.extendSchedule(session_id,newSchedule)
