@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 # FCFS scheduling algorithm.
+=======
+                                                                                                                                             # FCFS scheduling algorithm.
+
+>>>>>>> 74cc0da3c37809ef4619c6af45b135cf833c1586
 from app.strategies.scheduling.base_strategy import SchedulingStrategy
 from app.models.schedule_segment import ScheduleSegment
 from app.models.process_status import ProcessStatus
