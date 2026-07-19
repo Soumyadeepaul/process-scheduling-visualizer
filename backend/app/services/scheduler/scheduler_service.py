@@ -2,7 +2,6 @@
 from app.factory.scheduling_factory import SchedulingFactory
 from app.state.simulation_state_instance import simulationState
 from app.services.scheduler.schedule_reviser import ScheduleReviser
-from copy import deepcopy
 class SchedulerService:
     
     __schedulingFactory = SchedulingFactory()
@@ -14,20 +13,32 @@ class SchedulerService:
 
         strategy = self.__schedulingFactory.getStrategy(algorithm)
         
-        workingProcessList = deepcopy(processList)
+        schedule = strategy.execute(processList,time_qunatum,0)
 
-        schedule = strategy.execute(workingProcessList, time_qunatum, 0)
-        
-
-        simulationState.setSchedule(session_id, schedule, processList)
+        simulationState.setSchedule(session_id,schedule,processList)
     
     
     
     def recompute(self, session_id, processList, algorithm, time_qunatum):
 
         simData = simulationState.getSchedule(session_id)
+        
+        print("===== Session Process List =====")
+        for p in processList:
+            print(
+                p.getId(),
+                p.getRemainingTime()
+            )
+
+        print("===== Simulation Process List =====")
+        for p in simData.getProcessList():
+            print(
+                p.getId(),
+                p.getRemainingTime()
+            )
 
         if simData is None:
+            print("dsvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
             self.computeInitial(
                 session_id,
                 processList,
@@ -42,7 +53,8 @@ class SchedulerService:
         )
 
         strategy = self.__schedulingFactory.getStrategy(algorithm)
-
+        print("Current Time:", simData.getCurrentTime())
+        print("Current Index:", simData.getCurrentSegmentIndex())
         # Compute remaining schedule
         newSchedule = strategy.execute(revisedProcessList, time_qunatum, simData.getCurrentTime())
 

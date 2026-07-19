@@ -41,6 +41,17 @@ class Simulation:
 
         elif action == "RESUME":
 
+            if session_data.isDirty():
+
+                self.__schedulerService.recompute(
+                    session_id,
+                    session_data.getProcessList(),
+                    session_data.getAlgorithm(),
+                    session_data.getTimeQuantum()
+                )
+
+                session_data.setDirty(False)
+
             self.__paused[session_id] = False
         elif action == "RESET":
 
@@ -100,19 +111,6 @@ class Simulation:
                 simData.setCurrentTime(segment.getEnd())
                 simData.setCurrentSegmentIndex(simData.getCurrentSegmentIndex() + 1)
                 
-                if session_data.isDirty():
-
-                    self.__schedulerService.recompute(
-                        session_id,
-                        session_data.getProcessList(),
-                        session_data.getAlgorithm(),
-                        session_data.getTimeQuantum()
-                    )
-
-                    session_data.setDirty(False)
-
-                    # Refresh runtime state after recomputation
-                    simData = simulationState.getSchedule(session_id)
 
                 previous_end = segment.getEnd()
 

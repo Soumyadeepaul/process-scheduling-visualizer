@@ -60,8 +60,13 @@ def create_processes(request: CreateProcessesRequest):
         raise HTTPException(status_code=404, detail="Session not found")
 
     processList = __processFactory.createProcess(request.data)
+    
+    print("size: ",len(processList))
 
-    __sessionMap[session_id].setProcessList(processList)
+
+    # __sessionMap[session_id].setProcessList(processList)
+    __sessionMap[session_id].extendProcess(processList)
+    __sessionMap[session_id].setDirty(True)
     
     for process in __sessionMap[session_id].getProcessList():
         print(process.getId())
@@ -69,29 +74,29 @@ def create_processes(request: CreateProcessesRequest):
     return {"success": True}
 
 
-@router.post("/addprocess", status_code=201)
-def add_process(request: AddProcessRequest):
+# @router.post("/addprocess", status_code=201)
+# def add_process(request: AddProcessRequest):
 
-    session_id = request.session_id
+#     session_id = request.session_id
 
-    if session_id not in __sessionMap:
-        raise HTTPException(status_code=404, detail="Session not found")
+#     if session_id not in __sessionMap:
+#         raise HTTPException(status_code=404, detail="Session not found")
 
-    process = Process(
-        request.id,
-        request.arrival_time,
-        request.burst_time,
-        request.priority
-    )
+#     process = Process(
+#         request.id,
+#         request.arrival_time,
+#         request.burst_time,
+#         request.priority
+#     )
 
-    __sessionMap[session_id].addProcess(process)
+#     __sessionMap[session_id].addProcess(process)
     
-    for process in __sessionMap[session_id].getProcessList():
-        print(process.getId())
+#     for process in __sessionMap[session_id].getProcessList():
+#         print(process.getId())
 
-    return {
-        "success": True
-    }
+#     return {
+#         "success": True
+#     }
 
 
 # @router.put("/processes/{process_id}")
@@ -119,6 +124,8 @@ def update_scheduler(request: SchedulerRequest):
     session = __sessionMap[session_id]
 
     session.setAlgorithm(request.data.algorithm)
+    __sessionMap[session_id].setDirty(True)
+    
 
     if request.data.algorithm == "ROUND_ROBIN":
         session.setTimeQuantum(request.data.time_quantum)

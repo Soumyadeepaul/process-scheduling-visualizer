@@ -63,8 +63,11 @@ class SessionData:
     # Process Methods
     # -----------------------
 
-    def addProcess(self, process: Process):
-        self.__processList.append(process)
+    # def addProcess(self, process: Process):
+    #     self.__processList.append(process)
+    
+    def extendProcess(self, processList):
+        self.__processList.extend(processList)
 
     def removeProcess(self, processId):
         for process in self.__processList:

@@ -21,7 +21,7 @@ class SimulationState:
         simData.setMetrics(metrics)
         self.__dataMap[session_id] = simData
 
-    def appendSchedule(self, session_id, scheduleSegments):
+    def extendSchedule(self, session_id, scheduleSegments):
         simData = self.__dataMap[session_id]
         simData.getSchedule().extend(scheduleSegments)
         simData.setMetrics(
