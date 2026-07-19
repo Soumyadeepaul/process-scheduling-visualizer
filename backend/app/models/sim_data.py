@@ -96,7 +96,10 @@ class SimData:
     def reset(self):
         self.__schedule.clear()
         self.__currentTime = 0
+        self.__currentSegmentIndex = 0
         self.__metrics = None
+        self.__paused = False
+        self.__running = False
 
         for process in self.__processList:
             process.reset()

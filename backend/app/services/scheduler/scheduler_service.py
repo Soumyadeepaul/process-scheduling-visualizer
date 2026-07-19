@@ -38,7 +38,6 @@ class SchedulerService:
             )
 
         if simData is None:
-            print("dsvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv")
             self.computeInitial(
                 session_id,
                 processList,

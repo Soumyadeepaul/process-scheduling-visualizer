@@ -59,9 +59,18 @@ class Simulation:
 
             if task and not task.done():
                 task.cancel()
+
             self.__tasks.pop(session_id, None)
             self.__paused.pop(session_id, None)
+            self.__speed.pop(session_id, None)
+
+            simData = simulationState.getSchedule(session_id)
+
+            if simData is not None:
+                simData.reset()
+
             simulationState.removeSchedule(session_id)
+
             await websocketService.sendReset(session_id)
             
         elif action == "SPEED":
