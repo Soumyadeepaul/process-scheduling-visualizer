@@ -1,0 +1,1 @@
+# Completion time metric strategy.
