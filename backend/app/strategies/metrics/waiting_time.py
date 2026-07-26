@@ -1,33 +1,28 @@
-# Waiting time metric strategy.
 from app.strategies.metrics.base_metric import MetricStrategy
-from app.models.metrics_result import MetricBreakdown
 
 
 class WaitingTime(MetricStrategy):
 
     def calculate(self, result, scheduleSegments, processList):
 
-        waitingTime = MetricBreakdown()
+        completionTime = {}
 
-        perProcess = {}
+        # Find completion time of each process
+        for segment in scheduleSegments:
+            completionTime[segment.getProcess().getId()] = segment.getEnd()
+
+        waiting = {}
 
         for process in processList:
 
-            completionTime = 0
+            pid = process.getId()
 
-            for segment in scheduleSegments:
-                if segment.getProcess() == process.getId():
-                    completionTime = segment.getEnd()
-
-            waiting = (
-                completionTime
+            waiting[pid] = (
+                completionTime[pid]
                 - process.getArrivalTime()
                 - process.getBurstTime()
             )
 
-            perProcess[process.getId()] = waiting
-
-        waitingTime.setPerProcess(perProcess)
-        waitingTime.recomputeAverage()
-
-        result.setWaitingTime(waitingTime)
+        breakdown = result.getWaitingTime()
+        breakdown.setPerProcess(waiting)
+        breakdown.recomputeAverage()
