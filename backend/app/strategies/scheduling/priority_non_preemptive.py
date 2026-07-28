@@ -56,7 +56,8 @@ class PRIORITY(SchedulingStrategy):
                 ScheduleSegment(
                     process,
                     start,
-                    end
+                    end,
+                    ProcessStatus.COMPLETED
                 )
             )
 

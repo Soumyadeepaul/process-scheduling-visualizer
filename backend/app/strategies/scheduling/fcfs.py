@@ -41,7 +41,8 @@ class FCFS(SchedulingStrategy):
                 ScheduleSegment(
                     process,
                     start,
-                    end
+                    end,
+                    ProcessStatus.COMPLETED
                 )
             )
 

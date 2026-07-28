@@ -69,22 +69,8 @@ class PRIORITY_pre(SchedulingStrategy):
             if process.getStartTime() is None:
                 process.setStartTime(currentTime)
 
-            # Execute for one time unit
-            if (
-                schedule
-                and schedule[-1].getProcess() == process
-                and schedule[-1].getEnd() == currentTime
-            ):
-                schedule[-1].setEnd(currentTime + 1)
-            else:
-                schedule.append(
-                    ScheduleSegment(
-                        process,
-                        currentTime,
-                        currentTime + 1
-                    )
-                )
-
+            # Execute for one time unit.
+            start = currentTime
             currentTime += 1
 
             process.setRemainingTime(
@@ -97,5 +83,17 @@ class PRIORITY_pre(SchedulingStrategy):
                 ready.remove(process)
             else:
                 process.setStatus(ProcessStatus.READY)
+
+            if (
+                schedule
+                and schedule[-1].getProcess() == process
+                and schedule[-1].getEnd() == start
+            ):
+                schedule[-1].setEnd(currentTime)
+                schedule[-1].setState(process.getStatus())
+            else:
+                schedule.append(
+                    ScheduleSegment(process, start, currentTime, process.getStatus())
+                )
 
         return schedule

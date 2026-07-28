@@ -64,14 +64,6 @@ class RR(SchedulingStrategy):
             start = currentTime
             end = start + executed
 
-            schedule.append(
-                ScheduleSegment(
-                    process,
-                    start,
-                    end
-                )
-            )
-
             currentTime = end
 
             process.setRemainingTime(
@@ -91,5 +83,14 @@ class RR(SchedulingStrategy):
             else:
                 process.setStatus(ProcessStatus.READY)
                 ready.append(process)
+
+            schedule.append(
+                ScheduleSegment(
+                    process,
+                    start,
+                    end,
+                    process.getStatus()
+                )
+            )
 
         return schedule

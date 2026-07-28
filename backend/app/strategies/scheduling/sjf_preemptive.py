@@ -60,18 +60,8 @@ class SRTF(SchedulingStrategy):
             
         
 
-            if ( schedule and schedule[-1].getProcess() == process and schedule[-1].getEnd() == currentTime):
-                schedule[-1].setEnd(currentTime + 1)
-            else:
-                schedule.append(
-                    ScheduleSegment(
-                    process,
-                    currentTime,
-                    currentTime + 1
-        )
-    )
-
-            currentTime +=1
+            start = currentTime
+            currentTime += 1
 
             process.setRemainingTime(
                 process.getRemainingTime() - 1
@@ -83,6 +73,14 @@ class SRTF(SchedulingStrategy):
                 ready.remove(process)
             else:
                 process.setStatus(ProcessStatus.READY)
+
+            if schedule and schedule[-1].getProcess() == process and schedule[-1].getEnd() == start:
+                schedule[-1].setEnd(currentTime)
+                schedule[-1].setState(process.getStatus())
+            else:
+                schedule.append(
+                    ScheduleSegment(process, start, currentTime, process.getStatus())
+                )
 
 
         return schedule
