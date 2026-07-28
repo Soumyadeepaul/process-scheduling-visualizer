@@ -22,6 +22,6 @@ class TurnAroundTime(MetricStrategy):
                 - process.getArrivalTime()
             )
 
-        breakdown = result.getTurnAroundTime()
+        breakdown = result.getTurnaroundTime()
         breakdown.setPerProcess(turnaround)
         breakdown.recomputeAverage()

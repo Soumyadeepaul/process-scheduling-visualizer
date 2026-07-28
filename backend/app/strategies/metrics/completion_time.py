@@ -11,6 +11,6 @@ class CompletionTime(MetricStrategy):
         for segment in scheduleSegments:
             completion[segment.getProcess().getId()] = segment.getEnd()
 
-        breakdown = result.getCompletionTime()
-        breakdown.setPerProcess(completion)
-        breakdown.recomputeAverage()
+        # Completion time is stored directly as a process-ID-to-time mapping
+        # in MetricsResult, unlike the metrics that use MetricBreakdown.
+        result.setCompletionTime(completion)
