@@ -1,0 +1,169 @@
+.main-layout {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  flex-direction: column;
+
+  background: #111111;
+
+  box-sizing: border-box;
+}
+
+/* --------------------------------
+   Header
+-------------------------------- */
+
+.main-layout__header {
+  width: 100%;
+  height: 55px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 18px;
+
+  background: #ffffff;
+  border-bottom: 1px solid #d7dce5;
+
+  box-sizing: border-box;
+}
+
+/* --------------------------------
+   Brand
+-------------------------------- */
+
+.main-layout__brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.main-layout__logo {
+  width: 34px;
+  height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 7px;
+
+  background: #111827;
+  color: #ffffff;
+
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.main-layout__brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.main-layout__title {
+  color: #e5e7eb;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.main-layout__subtitle {
+  color: #475569;
+  font-size: 11px;
+}
+
+/* --------------------------------
+   Session
+-------------------------------- */
+
+.main-layout__session {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.main-layout__session-id {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 1px;
+}
+
+.main-layout__session-id span {
+  color: #64748b;
+  font-size: 7px;
+}
+
+.main-layout__session-id strong {
+  color: #111827;
+  font-size: 9px;
+  font-weight: 700;
+}
+
+.main-layout__connection {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+
+  color: #334155;
+
+  font-size: 9px;
+  font-weight: 600;
+}
+
+.main-layout__status-dot {
+  width: 7px;
+  height: 7px;
+
+  border-radius: 50%;
+
+  display: inline-block;
+}
+
+.main-layout__status-dot--connected {
+  background: #22c55e;
+}
+
+.main-layout__status-dot--disconnected {
+  background: #9ca3af;
+}
+
+/* --------------------------------
+   Content
+-------------------------------- */
+
+.main-layout__content {
+  width: 100%;
+  flex: 1;
+
+  box-sizing: border-box;
+}
+
+/* --------------------------------
+   Responsive
+-------------------------------- */
+
+@media (max-width: 640px) {
+
+  .main-layout__header {
+    height: auto;
+    min-height: 55px;
+
+    padding: 8px 12px;
+  }
+
+  .main-layout__brand {
+    gap: 8px;
+  }
+
+  .main-layout__session {
+    gap: 8px;
+  }
+
+  .main-layout__session-id {
+    display: none;
+  }
+
+}

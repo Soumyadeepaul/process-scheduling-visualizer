@@ -1,0 +1,408 @@
+/* --------------------------------
+   Process Table
+-------------------------------- */
+
+.process-table {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  box-sizing: border-box;
+  padding: 16px;
+
+  overflow: hidden;
+}
+
+.process-table__title {
+  text-align: center;
+  color: #1e3a5f;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+
+/* --------------------------------
+   Add Process
+-------------------------------- */
+
+.process-table__add-button {
+  width: 100%;
+  height: 40px;
+  flex-shrink: 0;
+
+  border: 1px solid #1e3a8a;
+  border-radius: 7px;
+
+  background: #2f5bd3;
+  color: white;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.process-table__add-button:hover {
+  background: #244fc0;
+}
+
+
+/* --------------------------------
+   Algorithm
+-------------------------------- */
+
+.process-table__label {
+  display: block;
+
+  text-align: center;
+
+  margin-top: 18px;
+  margin-bottom: 8px;
+
+  color: #111827;
+  font-size: 15px;
+}
+
+.process-table__select {
+  width: 100%;
+  height: 40px;
+  flex-shrink: 0;
+
+  padding: 0 10px;
+
+  border: 1px solid #30384d;
+  border-radius: 7px;
+
+  background: white;
+  color: #111827;
+
+  font-size: 15px;
+
+  box-sizing: border-box;
+}
+
+
+/* --------------------------------
+   Time Quantum
+-------------------------------- */
+
+.time-quantum {
+  width: 100%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.time-quantum label {
+  margin-top: 8px;
+  margin-bottom: 5px;
+
+  color: #111827;
+  font-size: 14px;
+}
+
+.time-quantum input {
+  width: 100px;
+  height: 32px;
+
+  padding: 0 8px;
+
+  border: 1px solid #30384d;
+  border-radius: 5px;
+
+  background: white;
+  color: #111827;
+
+  text-align: center;
+
+  box-sizing: border-box;
+}
+
+
+/* --------------------------------
+   Send Buttons
+-------------------------------- */
+
+.process-table__send-button {
+  width: 100%;
+  height: 40px;
+  flex-shrink: 0;
+
+  margin-top: 12px;
+
+  border: 1px solid #1e3a8a;
+  border-radius: 7px;
+
+  background: #2f5bd3;
+  color: white;
+
+  font-size: 15px;
+  font-weight: 700;
+
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.process-table__send-button:hover {
+  background: #244fc0;
+}
+
+.process-table__send-button:disabled {
+  background: #7894d5;
+  border-color: #7894d5;
+  cursor: not-allowed;
+}
+
+
+/* --------------------------------
+   Process Rows Container
+
+   IMPORTANT:
+   No flex: 1
+   No fixed height
+   No scrolling
+
+   The container grows naturally as
+   processes are added.
+-------------------------------- */
+.process-table__rows {
+  flex: 1 1 auto;
+  min-height: 0;
+
+  width: 100%;
+  margin-top: 18px;
+
+  display: flex;
+  flex-direction: column;
+
+  box-sizing: border-box;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  /* Hide scrollbar */
+  scrollbar-width: none;
+}
+
+/* Chrome / Edge / Safari */
+.process-table__rows::-webkit-scrollbar {
+  display: none;
+}
+
+/* Chrome / Edge / Safari */
+.process-table__rows::-webkit-scrollbar {
+  width: 6px;
+}
+
+.process-table__rows::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.process-table__rows::-webkit-scrollbar-thumb {
+  background: #94a3b8;
+  border-radius: 10px;
+}
+
+.process-table__rows::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+
+/* --------------------------------
+   Delete Button
+-------------------------------- */
+
+.process-row {
+  width: 100%;
+  min-height: 72px;
+  height: 72px;
+
+  margin-bottom: 10px;
+  padding: 12px;
+
+  display: grid;
+  grid-template-columns: 42px 1fr 1fr 1fr 32px;
+
+  align-items: center;
+  gap: 6px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+
+  background: white;
+  color: #1e3a5f;
+
+  font-size: 13px;
+
+  box-sizing: border-box;
+
+  flex-shrink: 0;
+}
+
+.process-row__delete {
+  width: 30px;
+  height: 30px;
+
+  border: none;
+  border-radius: 6px;
+
+  background: #fee2e2;
+  color: #dc2626;
+
+  font-size: 20px;
+  line-height: 1;
+
+  cursor: pointer;
+}
+
+.process-row__delete:hover {
+  background: #fecaca;
+}
+
+.process-row__delete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+
+/* --------------------------------
+   Empty State
+-------------------------------- */
+
+.process-table__empty {
+  width: 100%;
+
+  min-height: 72px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+
+  background: white;
+  color: #64748b;
+
+  font-size: 14px;
+
+  box-sizing: border-box;
+}
+
+
+/* --------------------------------
+   Add Process Modal
+-------------------------------- */
+
+.process-form-overlay {
+  position: fixed;
+  inset: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: rgba(15, 23, 42, 0.45);
+
+  z-index: 1000;
+}
+
+.process-form {
+  width: 360px;
+
+  padding: 20px;
+
+  border-radius: 10px;
+
+  background: white;
+
+  box-sizing: border-box;
+}
+
+.process-form__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 18px;
+}
+
+.process-form__header h3 {
+  margin: 0;
+
+  color: #1e3a5f;
+}
+
+.process-form__close {
+  width: 30px;
+  height: 30px;
+
+  border: none;
+  border-radius: 5px;
+
+  background: #fee2e2;
+  color: #dc2626;
+
+  font-size: 20px;
+
+  cursor: pointer;
+}
+
+.process-form__field {
+  display: flex;
+  flex-direction: column;
+
+  margin-bottom: 12px;
+}
+
+.process-form__field label {
+  margin-bottom: 5px;
+
+  font-size: 13px;
+  color: #334155;
+}
+
+.process-form__field input {
+  height: 36px;
+
+  padding: 0 8px;
+
+  border: 1px solid #cbd5e1;
+  border-radius: 5px;
+
+  box-sizing: border-box;
+}
+
+.process-form__submit {
+  width: 100%;
+  height: 38px;
+
+  margin-top: 8px;
+
+  border: 1px solid #1e3a8a;
+  border-radius: 6px;
+
+  background: #2f5bd3;
+  color: white;
+
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+
+.process-form__error {
+  margin-bottom: 12px;
+  padding: 8px;
+  border-radius: 5px;
+  background: #fee2e2;
+  color: #dc2626;
+  font-size: 13px;
+  text-align: center;
+}
