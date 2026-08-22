@@ -15,7 +15,6 @@ interface SimulationVisualizationProps {
   simulationStarted: boolean;
   resetKey: number;
 }
-
 const SimulationVisualization: React.FC<
   SimulationVisualizationProps
 > = ({
@@ -36,32 +35,27 @@ const SimulationVisualization: React.FC<
   const [terminated, setTerminated] =
     useState<number[]>([]);
 
-  /*
-   * --------------------------------
-   * CURRENT SEGMENT INDEX
-   * --------------------------------
-   */
   const [currentIndex, setCurrentIndex] =
     useState(0);
 
-  /*
-   * --------------------------------
-   * LOCAL VISUAL TIME
-   * --------------------------------
-   */
   const [visualTime, setVisualTime] =
     useState(0);
 
   /*
    * --------------------------------
-   * RESET
+   * RESET WHEN PROCESSES CHANGE
    * --------------------------------
    */
   useEffect(() => {
     setReadyQueue(
-      processes.map(
-        (process) => process.id
-      )
+      processes
+        .filter(
+          (process) =>
+            process.arrival_time <= 0
+        )
+        .map(
+          (process) => process.id
+        )
     );
 
     setCpuProcess(null);
@@ -70,11 +64,21 @@ const SimulationVisualization: React.FC<
     setVisualTime(0);
   }, [processes]);
 
+  /*
+   * --------------------------------
+   * RESET SIMULATION
+   * --------------------------------
+   */
   useEffect(() => {
     setReadyQueue(
-      processes.map(
-        (process) => process.id
-      )
+      processes
+        .filter(
+          (process) =>
+            process.arrival_time <= 0
+        )
+        .map(
+          (process) => process.id
+        )
     );
 
     setCpuProcess(null);
@@ -87,11 +91,6 @@ const SimulationVisualization: React.FC<
    * --------------------------------
    * FOLLOW BACKEND CLOCK
    * --------------------------------
-   *
-   * simulationTime tells us where the
-   * backend currently is.
-   *
-   * We never move backwards.
    */
   useEffect(() => {
     setVisualTime((previous) =>
@@ -101,7 +100,35 @@ const SimulationVisualization: React.FC<
 
   /*
    * --------------------------------
-   * CURRENT MESSAGE
+   * UPDATE READY QUEUE
+   * --------------------------------
+   */
+  useEffect(() => {
+    const terminatedSet =
+      new Set(terminated);
+
+    setReadyQueue(
+      processes
+        .filter(
+          (process) =>
+            process.arrival_time <= visualTime &&
+            !terminatedSet.has(process.id) &&
+            process.id !== cpuProcess
+        )
+        .map(
+          (process) => process.id
+        )
+    );
+  }, [
+    visualTime,
+    processes,
+    terminated,
+    cpuProcess,
+  ]);
+
+  /*
+   * --------------------------------
+   * CURRENT SEGMENT
    * --------------------------------
    */
   const currentSegment =
@@ -111,9 +138,6 @@ const SimulationVisualization: React.FC<
    * --------------------------------
    * ADVANCE VISUAL TIME
    * --------------------------------
-   *
-   * This is the same timing model used
-   * by the Gantt chart.
    */
   useEffect(() => {
     if (
@@ -127,7 +151,6 @@ const SimulationVisualization: React.FC<
     const timer =
       window.setInterval(() => {
         setVisualTime((previous) => {
-
           const increment =
             0.05 * speed;
 
@@ -150,7 +173,7 @@ const SimulationVisualization: React.FC<
 
   /*
    * --------------------------------
-   * PLAY CURRENT SEGMENT
+   * START CURRENT SEGMENT
    * --------------------------------
    */
   useEffect(() => {
@@ -158,10 +181,6 @@ const SimulationVisualization: React.FC<
       return;
     }
 
-    /*
-     * Do not show the CPU before the
-     * process actually arrives.
-     */
     if (
       visualTime <
       currentSegment.start
@@ -170,9 +189,6 @@ const SimulationVisualization: React.FC<
       return;
     }
 
-    /*
-     * Process enters CPU.
-     */
     setReadyQueue((previous) =>
       previous.filter(
         (id) =>
@@ -184,7 +200,6 @@ const SimulationVisualization: React.FC<
     setCpuProcess(
       currentSegment.process_id
     );
-
   }, [
     currentSegment,
     visualTime,
@@ -246,7 +261,6 @@ const SimulationVisualization: React.FC<
       (previous) =>
         previous + 1
     );
-
   }, [
     visualTime,
     currentSegment,

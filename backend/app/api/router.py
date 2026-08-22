@@ -42,7 +42,7 @@ def create_session():
 
 @router.delete("/session/{session_id}")
 def delete_session(session_id: str):
-    del __sessionMap[id]
+    del __sessionMap[session_id]
     __sessionService.endSession(session_id)
     return { "success": True, "message": "Session deleted" }
 
