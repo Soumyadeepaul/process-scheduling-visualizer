@@ -235,14 +235,7 @@ const ProcessTable: React.FC<ProcessTableProps> = ({
         PROCESS TABLE
       </div>
 
-      {/* Add Process */}
-
-      <button
-        className="process-table__add-button"
-        onClick={openAddForm}
-      >
-        + Add Process
-      </button>
+      
 
       {/* Algorithm */}
 
@@ -304,20 +297,16 @@ const ProcessTable: React.FC<ProcessTableProps> = ({
           : "Send Algorithm"}
       </button>
 
-      {/* Send Process */}
+      {/* Add Process */}
 
       <button
-        className="process-table__send-button"
-        onClick={sendProcesses}
-        disabled={
-          sending ||
-          !processes.length
-        }
+        className="process-table__add-button"
+        onClick={openAddForm}
       >
-        {sending
-          ? "Sending..."
-          : "Send Process"}
+        + Add Process
       </button>
+
+      
 
       {/* Process Rows */}
 
@@ -373,6 +362,8 @@ const ProcessTable: React.FC<ProcessTableProps> = ({
         )}
 
       </div>
+
+
 
       {/* Add Process Modal */}
 
@@ -489,6 +480,21 @@ const ProcessTable: React.FC<ProcessTableProps> = ({
 
         </div>
       )}
+
+      {/* Send Process */}
+
+      <button
+        className="process-table__send-button"
+        onClick={sendProcesses}
+        disabled={
+          sending ||
+          !processes.length
+        }
+      >
+        {sending
+          ? "Sending..."
+          : "Send Process"}
+      </button>
 
     </div>
   );

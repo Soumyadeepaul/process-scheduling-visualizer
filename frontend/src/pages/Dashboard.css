@@ -12,9 +12,11 @@
 .dashboard__top {
   width: 100%;
   display: grid;
-  grid-template-columns: 0.32fr 1fr;
+  grid-template-columns: 1fr 2.4fr;
   gap: 10px;
-  min-height: 360px;
+  height: 530px;
+  min-height: 530px;
+  box-sizing: border-box;
 }
 
 .dashboard-card {
@@ -22,6 +24,12 @@
   border-radius: 10px;
   box-sizing: border-box;
   overflow: hidden;
+}
+
+.dashboard-card--process,
+.dashboard-card--simulation {
+  height: 100%;
+  min-height: 0;
 }
 
 .dashboard-card--process {
@@ -51,86 +59,38 @@
   min-height: 100px;
 }
 
-.dashboard-card__title {
-  padding: 8px 12px;
-  color: #334155;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.3px;
-  text-align: center;
-}
-
-.gantt-placeholder,
-.metrics-placeholder {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 60px;
-  color: #111827;
-}
-
-.dashboard-loading,
-.dashboard-error {
-  padding: 30px;
-  color: #111827;
-}
-
+/* Tablet */
 @media (max-width: 900px) {
   .dashboard__top {
     grid-template-columns: 1fr;
+    height: auto;
+    min-height: 0;
+  }
+
+  .dashboard-card--process,
+  .dashboard-card--simulation {
+    height: auto;
   }
 }
 
+/* Mobile */
 @media (max-width: 640px) {
   .dashboard {
     padding: 6px;
     gap: 8px;
   }
-}
 
+  .dashboard__top {
+    grid-template-columns: 1fr;
+    height: auto;
+    min-height: 0;
+    gap: 8px;
+  }
 
-.dashboard__top {
-  display: grid;
-  grid-template-columns: 1fr 2.4fr;
-  height: 530px;
-  min-height: 530px;
-  max-height: 530px;
-  overflow: hidden;
-}
-
-.dashboard-card--process {
-  min-height: 0;
-  height: 100%;
-  overflow: hidden;
-}
-
-.dashboard-card--simulation {
-  min-height: 0;
-  height: 100%;
-  overflow: hidden;
-}
-
-
-.dashboard__top {
-  display: grid;
-  grid-template-columns: 1fr 2.4fr;
-
-  height: 530px;
-  min-height: 530px;
-
-  overflow: hidden;
-}
-
-.dashboard-card--process {
-  height: 100%;
-  min-height: 0;
-
-  overflow: hidden;
-}
-
-.dashboard-card--simulation {
-  height: 100%;
-  min-height: 0;
-
-  overflow: hidden;
+  .dashboard-card--process,
+  .dashboard-card--simulation {
+    width: 100%;
+    height: auto;
+    min-height: 0;
+  }
 }
