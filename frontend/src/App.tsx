@@ -1,11 +1,8 @@
-import './App.css'
+import React from "react";
+import Dashboard from "./pages/Dashboard";
 
 function App() {
-  return (
-    <div>
-      <h1>Process Scheduling Virtualizer (PSV)</h1>
-    </div>
-  )
+  return <Dashboard />;
 }
 
-export default App
+export default App;
