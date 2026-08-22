@@ -7,9 +7,13 @@ class WaitingTime(MetricStrategy):
 
         completionTime = {}
 
-        # Find completion time of each process
         for segment in scheduleSegments:
-            completionTime[segment.getProcess().getId()] = segment.getEnd()
+            process = segment.getProcess()
+
+            if process is None:
+                continue
+
+            completionTime[process.getId()] = segment.getEnd()
 
         waiting = {}
 

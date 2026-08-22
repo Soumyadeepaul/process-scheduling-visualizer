@@ -7,10 +7,13 @@ class ResponseTime(MetricStrategy):
 
         firstStartTime = {}
 
-        # Find the first execution time of each process
         for segment in scheduleSegments:
+            process = segment.getProcess()
 
-            pid = segment.getProcess().getId()
+            if process is None:
+                continue
+
+            pid = process.getId()
 
             if pid not in firstStartTime:
                 firstStartTime[pid] = segment.getStart()

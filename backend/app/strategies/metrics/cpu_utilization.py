@@ -8,13 +8,24 @@ class CpuUtilization(MetricStrategy):
         busyTime = 0
 
         for segment in scheduleSegments:
+            process = segment.getProcess()
+
+            if process is None:
+                continue
 
             busyTime += (
                 segment.getEnd()
                 - segment.getStart()
             )
 
-        totalTime = scheduleSegments[-1].getEnd()
+        if not scheduleSegments:
+            result.setCpuUtilization(0)
+            return
+
+        totalTime = max(
+            segment.getEnd()
+            for segment in scheduleSegments
+        )
 
         utilization = 0
 

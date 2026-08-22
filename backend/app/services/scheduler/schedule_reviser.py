@@ -9,6 +9,7 @@ class ScheduleReviser:
         scheduledProcessIds = {
             segment.getProcess().getId()
             for segment in schedule
+            if segment.getProcess() is not None
         }
 
         deletedSegments = schedule[currentIndex:]
@@ -17,6 +18,9 @@ class ScheduleReviser:
         for i, segment in enumerate(deletedSegments):
 
             process = segment.getProcess()
+
+            if process is None:
+                continue
 
             if i == 0:
                 restore = max(

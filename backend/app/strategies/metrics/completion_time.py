@@ -7,10 +7,12 @@ class CompletionTime(MetricStrategy):
 
         completion = {}
 
-        # Find completion time of each process
         for segment in scheduleSegments:
-            completion[segment.getProcess().getId()] = segment.getEnd()
+            process = segment.getProcess()
 
-        # Completion time is stored directly as a process-ID-to-time mapping
-        # in MetricsResult, unlike the metrics that use MetricBreakdown.
+            if process is None:
+                continue
+
+            completion[process.getId()] = segment.getEnd()
+
         result.setCompletionTime(completion)
