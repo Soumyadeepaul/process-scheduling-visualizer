@@ -181,3 +181,9 @@ Controller Layer
 | Metrics Service | Simulation State | Store updated metrics. |
 | Simulation State | WebSocket Service | Provide the latest simulation state. |
 | WebSocket Service | React Frontend | Push real-time updates to the user. |
+
+
+
+<p align="center">
+  <img src="images/PSV Service Communication Flow.png" alt="Service Communication Flow" width="1000"/>
+</p>

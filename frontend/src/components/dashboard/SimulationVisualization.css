@@ -1,0 +1,192 @@
+.simulation-visualization {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+.simulation-visualization__title {
+  padding: 10px 12px 0;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+
+.simulation-flow {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 12px;
+}
+
+/* --------------------------------
+   Queue
+-------------------------------- */
+
+.simulation-queue {
+  width: min(430px, 85%);
+  height: 82px;
+  padding: 8px 12px;
+  border: 2px solid #30384d;
+  border-radius: 10px;
+  background: #ffffff;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.simulation-queue__label {
+  height: 20px;
+  display: flex;
+  align-items: center;
+  color: #111827;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.simulation-queue__content {
+  width: 100%;
+  height: 38px;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: none;
+  cursor: grab;
+  user-select: none;
+  box-sizing: border-box;
+}
+
+.simulation-queue__content::-webkit-scrollbar {
+  display: none;
+}
+
+.simulation-queue__content.is-dragging {
+  cursor: grabbing;
+}
+
+/* --------------------------------
+   Process token
+-------------------------------- */
+
+.process-token {
+  flex: 0 0 42px;
+  width: 42px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #30384d;
+  border-radius: 6px;
+  background: #dbeafe;
+  color: #111827;
+  font-size: 12px;
+  font-weight: 700;
+  box-sizing: border-box;
+  animation: process-enter 0.3s ease-out;
+}
+
+@keyframes process-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* --------------------------------
+   CPU
+-------------------------------- */
+
+.simulation-cpu {
+  width: 160px;
+  height: 72px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #2563eb;
+  border-radius: 10px;
+  background: #bfdbfe;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.simulation-cpu__label {
+  color: #111827;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.simulation-cpu__process {
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* --------------------------------
+   Arrows
+-------------------------------- */
+
+.simulation-arrow {
+  position: relative;
+  width: 2px;
+  height: 30px;
+  background: #30384d;
+}
+
+.simulation-arrow span {
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 7px solid transparent;
+  border-right: 7px solid transparent;
+  border-top: 10px solid #30384d;
+}
+
+/* --------------------------------
+   Tablet
+-------------------------------- */
+
+@media (max-width: 900px) {
+  .simulation-queue {
+    width: min(400px, 85%);
+  }
+}
+
+/* --------------------------------
+   Mobile
+-------------------------------- */
+
+@media (max-width: 640px) {
+  .simulation-flow {
+    padding: 10px;
+  }
+
+  .simulation-queue {
+    width: 92%;
+    height: 78px;
+  }
+
+  .simulation-cpu {
+    width: 140px;
+    height: 68px;
+  }
+
+  .simulation-arrow {
+    height: 24px;
+  }
+}
