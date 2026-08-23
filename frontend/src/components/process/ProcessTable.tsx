@@ -36,7 +36,7 @@ const ProcessTable: React.FC<ProcessTableProps> = ({
   const [pid, setPid] = useState("");
   const [arrivalTime, setArrivalTime] = useState("");
   const [burstTime, setBurstTime] = useState("");
-  const [priority, setPriority] = useState("");
+  const [priority, setPriority] = useState("1");
 
   const [formError, setFormError] = useState("");
 
@@ -59,14 +59,24 @@ const ProcessTable: React.FC<ProcessTableProps> = ({
     }
 
     const processId = Number(pid);
+    const arrival = Number(arrivalTime);
+    const burst = Number(burstTime);
+    const processPriority = Number(priority);
 
-    /*
-     * Check only the processes currently
-     * present in the table.
-     *
-     * Therefore, deleting P3 makes P3
-     * available again.
-     */
+    if (
+      !Number.isInteger(processId) ||
+      processId < 1 ||
+      !Number.isInteger(arrival) ||
+      arrival < 0 ||
+      !Number.isInteger(burst) ||
+      burst < 1 ||
+      !Number.isInteger(processPriority) ||
+      processPriority < 1
+    ) {
+      setFormError("Please enter valid values.");
+      return;
+    }
+
     const pidAlreadyExists = processes.some(
       (process) => process.id === processId
     );
@@ -78,9 +88,9 @@ const ProcessTable: React.FC<ProcessTableProps> = ({
 
     const newProcess: Process = {
       id: processId,
-      arrival_time: Number(arrivalTime),
-      burst_time: Number(burstTime),
-      priority: Number(priority),
+      arrival_time: arrival,
+      burst_time: burst,
+      priority: processPriority,
     };
 
     onAddProcess(newProcess);
@@ -88,7 +98,7 @@ const ProcessTable: React.FC<ProcessTableProps> = ({
     setPid("");
     setArrivalTime("");
     setBurstTime("");
-    setPriority("");
+    setPriority("1");
     setFormError("");
     setShowForm(false);
   };
@@ -227,6 +237,7 @@ const ProcessTable: React.FC<ProcessTableProps> = ({
     setFormError("");
     setShowForm(false);
   };
+  
 
   return (
     <div className="process-table">
@@ -401,10 +412,15 @@ const ProcessTable: React.FC<ProcessTableProps> = ({
               <input
                 type="number"
                 min="1"
+                step="1"
                 value={pid}
                 onChange={(event) => {
-                  setPid(event.target.value);
-                  setFormError("");
+                  const value = event.target.value;
+
+                  if (Number(value) >= 1) {
+                    setPid(value);
+                    setFormError("");
+                  }
                 }}
               />
             </div>
@@ -419,12 +435,15 @@ const ProcessTable: React.FC<ProcessTableProps> = ({
               <input
                 type="number"
                 min="0"
+                step="1"
                 value={arrivalTime}
                 onChange={(event) => {
-                  setArrivalTime(
-                    event.target.value
-                  );
-                  setFormError("");
+                  const value = event.target.value;
+
+                  if (Number(value) >= 0) {
+                    setArrivalTime(value);
+                    setFormError("");
+                  }
                 }}
               />
             </div>
@@ -439,12 +458,15 @@ const ProcessTable: React.FC<ProcessTableProps> = ({
               <input
                 type="number"
                 min="1"
+                step="1"
                 value={burstTime}
                 onChange={(event) => {
-                  setBurstTime(
-                    event.target.value
-                  );
-                  setFormError("");
+                  const value = event.target.value;
+
+                  if (Number(value) >= 1) {
+                    setBurstTime(value);
+                    setFormError("");
+                  }
                 }}
               />
             </div>
@@ -457,12 +479,15 @@ const ProcessTable: React.FC<ProcessTableProps> = ({
               <input
                 type="number"
                 min="1"
+                step="1"
                 value={priority}
                 onChange={(event) => {
-                  setPriority(
-                    event.target.value
-                  );
-                  setFormError("");
+                  const value = event.target.value;
+
+                  if (Number(value) >= 1) {
+                    setPriority(value);
+                    setFormError("");
+                  }
                 }}
               />
             </div>
