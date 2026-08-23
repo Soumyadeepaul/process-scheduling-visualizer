@@ -92,28 +92,28 @@ const Metrics: React.FC<MetricsProps> = ({ sessionId }) => {
       <div className="metrics-grid">
 
         <div className="metric-box">
-          <span>Waiting</span>
+          <span>Waiting Time</span>
           <strong>
             {metrics?.waiting_time?.average ?? "-"}
           </strong>
         </div>
 
         <div className="metric-box">
-          <span>Turnaround</span>
+          <span>Turnaround Time</span>
           <strong>
             {metrics?.turnaround_time?.average ?? "-"}
           </strong>
         </div>
 
         <div className="metric-box">
-          <span>Response</span>
+          <span>Response Time</span>
           <strong>
             {metrics?.response_time?.average ?? "-"}
           </strong>
         </div>
 
         <div className="metric-box">
-          <span>Completion</span>
+          <span>Completion Time</span>
           <strong>
             {completionTime ?? "-"}
           </strong>

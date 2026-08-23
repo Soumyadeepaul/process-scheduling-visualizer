@@ -1,1 +1,4 @@
 # Python dependencies.
+fastapi
+uvicorn
+websockets
